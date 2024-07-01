@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "829631894727",
+    "project_id": "grocerygo-bc99e",
+    "storage_bucket": "grocerygo-bc99e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829631894727:android:a1095101aa656aa6e55ae2",
+        "android_client_info": {
+          "package_name": "uk.ac.tees.mad.d3617913"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_JAaUuoN4FI0MWJbDdWiaF8eSD_ugjGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
