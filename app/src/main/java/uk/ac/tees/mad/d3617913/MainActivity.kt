@@ -4,14 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -28,31 +22,28 @@ import uk.ac.tees.mad.d3617913.ui.theme.GroceryGoTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             GroceryGoTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GroceryGoApp(Modifier.padding(innerPadding))
-                }
+                GroceryGoApp()
+
             }
         }
     }
 }
 
 @Composable
-fun GroceryGoApp(modifier: Modifier = Modifier) {
+fun GroceryGoApp() {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
-    NavHost(navController = navController, startDestination = "splash") {
-        composable("splash") {
+    NavHost(navController = navController, startDestination = Screen.Splash.route) {
+        composable(Screen.Splash.route) {
             SplashScreen {
                 scope.launch(Dispatchers.Main) {
                     navController.popBackStack()
-                    navController.navigate("home")
+                    navController.navigate(Screen.Home.route)
                 }
             }
-        }
-        composable("home") {
-            HomeScreen(navHostController = navController)
         }
 
         composable(Screen.Home.route) {
