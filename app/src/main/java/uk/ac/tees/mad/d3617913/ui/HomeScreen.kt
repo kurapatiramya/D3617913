@@ -54,7 +54,7 @@ fun HomeScreen(navController: NavHostController) {
                 })
             NavigationBarItem(
                 selected = false,
-                onClick = { /*TODO*/ },
+                onClick = {  navController.navigate(Screen.Profile.route)  },
                 icon = { Icon(imageVector = Icons.Default.Person, contentDescription = null) },
                 label = {
                     Text(text = "Profile")

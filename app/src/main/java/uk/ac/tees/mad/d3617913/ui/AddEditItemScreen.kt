@@ -40,6 +40,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -145,7 +146,8 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                     label = { Text(text = "Quantity") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
                     ),
                     keyboardActions = KeyboardActions(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
@@ -175,7 +177,10 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                     )
                     DropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
                     ) {
                         categories.forEach { categoryItem ->
                             DropdownMenuItem(
