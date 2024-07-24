@@ -1,11 +1,16 @@
 package uk.ac.tees.mad.d3617913.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -35,11 +40,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
@@ -135,13 +142,31 @@ fun GroceryListItem(groceryList: GroceryList, navController: NavController) {
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable {
-
+                navController.navigate(Screen.AddEditItem.route + "/" + groceryList.id)
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
+        Image(
+            painter = rememberAsyncImagePainter(groceryList.imageLink),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            contentScale = ContentScale.Crop
+        )
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = groceryList.name, style = MaterialTheme.typography.titleSmall)
-            Text(text = groceryList.quantity, style = MaterialTheme.typography.bodyMedium)
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = groceryList.name, style = MaterialTheme.typography.titleMedium)
+
+                Text(
+                    text = "Quantity: ${groceryList.quantity}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }

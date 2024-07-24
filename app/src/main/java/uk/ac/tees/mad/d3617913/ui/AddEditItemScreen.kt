@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,6 +26,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -122,7 +124,16 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                     text = "Add/Edit Item",
                     fontSize = 24.sp
                 )
-            })
+            },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -275,7 +286,11 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                                         itemData,
                                         onSuccess = {
                                             navController.popBackStack()
-                                            Toast.makeText(context, "Saved", Toast.LENGTH_SHORT)
+                                            Toast.makeText(
+                                                context,
+                                                "Saved",
+                                                Toast.LENGTH_SHORT
+                                            )
                                                 .show()
                                             isLoading = false
                                         },
