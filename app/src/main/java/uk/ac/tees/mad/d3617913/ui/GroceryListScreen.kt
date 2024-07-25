@@ -5,12 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -34,27 +31,33 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroceryListScreen(navController: NavController, listId: String) {
     val db = FirebaseFirestore.getInstance()
-    var groceryItems by remember { mutableStateOf(listOf<GroceryItem>()) }
+    var groceryItem by remember { mutableStateOf(GroceryItem()) }
 
     LaunchedEffect(listId) {
-        groceryItems = db.collection("groceryLists").document(listId).collection("items").get()
-            .await().documents.map { document ->
-                GroceryItem(
-                    id = document.id,
-                    name = document.getString("name") ?: "",
-                    quantity = document.getString("quantity") ?: "",
-                    category = document.getString("category") ?: "",
-                    notes = document.getString("notes") ?: "",
-                    bought = document.getBoolean("bought") ?: false,
-                    imageUri = document.getString("imageUri")
-                )
+        db.collection("items").document(listId).get()
+            .addOnSuccessListener { snapshot ->
+                val id = snapshot.id
+                val data = snapshot.data
+                data?.let { document ->
+                    groceryItem = GroceryItem(
+                        id = id,
+                        name = document["name"] as String? ?: "",
+                        quantity = document["quantity"] as String? ?: "",
+                        category = document["category"] as String? ?: "",
+                        notes = document["notes"] as String? ?: "",
+                        bought = document["bought"] as Boolean ?: false,
+                        imageUri = document["imageUri"] as String? ?: "",
+                    )
+                }
+
             }
+
+
     }
 
     Scaffold(
@@ -77,26 +80,23 @@ fun GroceryListScreen(navController: NavController, listId: String) {
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(groceryItems) { groceryItem ->
-                        GroceryItemRow(groceryItem, navController, listId)
-                    }
-                }
+                GroceryItemCard(groceryItem, navController, listId)
             }
         }
     }
 }
 
 @Composable
-fun GroceryItemRow(groceryItem: GroceryItem, navController: NavController, listId: String) {
+fun GroceryItemCard(groceryItem: GroceryItem, navController: NavController, listId: String) {
     val db = FirebaseFirestore.getInstance()
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { /* Navigate to Edit Item Screen */ },
+            .clickable {
+
+            },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
@@ -107,7 +107,7 @@ fun GroceryItemRow(groceryItem: GroceryItem, navController: NavController, listI
         }
         Row {
             IconButton(onClick = {
-                db.collection("groceryLists").document(listId).collection("items")
+                db.collection("items").document(listId).collection("items")
                     .document(groceryItem.id).delete()
             }) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete")
@@ -115,7 +115,7 @@ fun GroceryItemRow(groceryItem: GroceryItem, navController: NavController, listI
             Checkbox(
                 checked = groceryItem.bought,
                 onCheckedChange = { isChecked ->
-                    db.collection("groceryLists").document(listId).collection("items")
+                    db.collection("items").document(listId).collection("items")
                         .document(groceryItem.id).update("bought", isChecked)
                 }
             )
@@ -135,11 +135,11 @@ fun GroceryItemRow(groceryItem: GroceryItem, navController: NavController, listI
 }
 
 data class GroceryItem(
-    val id: String,
-    val name: String,
-    val quantity: String,
-    val category: String,
-    val notes: String,
-    val bought: Boolean,
-    val imageUri: String?
+    val id: String = "",
+    val name: String = "",
+    val quantity: String = "",
+    val category: String = "",
+    val notes: String = "",
+    val bought: Boolean = false,
+    val imageUri: String? = null
 )
