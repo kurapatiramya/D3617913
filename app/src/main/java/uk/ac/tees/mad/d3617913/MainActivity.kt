@@ -51,8 +51,16 @@ fun GroceryGoApp() {
         composable(Screen.Home.route) {
             HomeScreen(navController)
         }
-        composable(Screen.GroceryList.route) {
-            GroceryListScreen(navController)
+        composable(
+            route = Screen.GroceryList.route + "/{itemId}",
+            arguments = listOf(
+                navArgument("itemId") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            val itemId = it.arguments?.getString("itemId") ?: ""
+            GroceryListScreen(navController, itemId)
         }
         composable(
             route = Screen.AddEditItem.route + "/{itemId}",

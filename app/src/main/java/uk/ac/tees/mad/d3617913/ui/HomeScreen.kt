@@ -81,7 +81,7 @@ fun HomeScreen(navController: NavHostController) {
             )
         })
     }, floatingActionButton = {
-        FloatingActionButton(onClick = { navController.navigate(Screen.AddEditItem.route) }) {
+        FloatingActionButton(onClick = { navController.navigate(Screen.AddEditItem.route + "/ "  ) }) {
             Icon(imageVector = Icons.Default.Add, contentDescription = null)
         }
     }, bottomBar = {
