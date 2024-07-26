@@ -81,7 +81,7 @@ fun HomeScreen(navController: NavHostController) {
             )
         })
     }, floatingActionButton = {
-        FloatingActionButton(onClick = { navController.navigate(Screen.AddEditItem.route + "/ "  ) }) {
+        FloatingActionButton(onClick = { navController.navigate(Screen.AddEditItem.route + "/ ") }) {
             Icon(imageVector = Icons.Default.Add, contentDescription = null)
         }
     }, bottomBar = {
@@ -142,7 +142,7 @@ fun GroceryListItem(groceryList: GroceryList, navController: NavController) {
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable {
-                navController.navigate(Screen.AddEditItem.route + "/" + groceryList.id)
+                navController.navigate(Screen.GroceryList.route + "/" + groceryList.id)
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
