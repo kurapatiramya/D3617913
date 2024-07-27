@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
-    id ("dagger.hilt.android.plugin")
     id("com.google.devtools.ksp")
 }
 
@@ -70,12 +69,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
-    //Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.47")
     implementation(libs.firebase.common.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
-    ksp("com.google.dagger:hilt-compiler:2.47")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
 
@@ -84,6 +80,11 @@ dependencies {
 
     //Accompanist: for permission handling
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+
+    //Room
+    implementation ("androidx.room:room-runtime:2.6.1")
+    ksp ("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
