@@ -2,6 +2,7 @@ package uk.ac.tees.mad.d3617913.ui
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -113,6 +114,7 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
             notes = TextFieldValue(item.getString("notes") ?: "")
             imageUri = item.getString("imageUri")?.let { Uri.parse(it) }
         }
+        Log.d("URIL IMSGE", imageUri.toString())
         categories =
             db.collection("categories").get().await().documents.map { it.getString("name") ?: "" }
 
@@ -274,7 +276,7 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                             "notes" to notes.text
                         )
 
-                        if (imageUri != null) {
+                        if (imageUri != null && imageUri.toString().startsWith("content://")) {
                             val storageRef =
                                 storage.reference.child("images/${UUID.randomUUID()}")
                             storageRef.putFile(imageUri!!).addOnSuccessListener {
@@ -302,8 +304,14 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                                         }
                                     )
                                 }
+                            }.addOnFailureListener {
+                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT)
+                                    .show()
+                                it.printStackTrace()
+                                isLoading = false
                             }
                         } else {
+                            itemData["imageUri"] = "$imageUri"
                             saveItemToFirestore(
                                 db, itemId, itemData,
                                 onSuccess = {
