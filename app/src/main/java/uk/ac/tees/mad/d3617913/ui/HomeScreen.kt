@@ -74,38 +74,55 @@ fun HomeScreen(navController: NavHostController) {
         isLoading = false
     }
 
-    Scaffold(topBar = {
-        TopAppBar(title = {
-            Text(
-                text = "GroceryGo", fontSize = 30.sp, fontWeight = FontWeight.SemiBold
-            )
-        })
-    }, floatingActionButton = {
-        FloatingActionButton(onClick = { navController.navigate(Screen.AddEditItem.route + "/ ") }) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = null)
-        }
-    }, bottomBar = {
-        NavigationBar {
-            NavigationBarItem(
-                selected = false,
-                onClick = { navController.navigate(Screen.Categories.route) },
-                icon = {
-                    Icon(imageVector = Icons.Default.Category, contentDescription = null)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "GroceryGo",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 },
-                label = {
-                    Text(text = "Categories")
-                })
-            NavigationBarItem(
-                selected = false,
-                onClick = { navController.navigate(Screen.Profile.route) },
-                icon = { Icon(imageVector = Icons.Default.Person, contentDescription = null) },
-                label = {
-                    Text(text = "Profile")
+                actions = {
+                    IconButton(onClick = { navController.navigate(Screen.Categories.route) }) {
+                        Icon(
+                            imageVector = Icons.Default.Category,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
                 }
             )
-        }
-
-    }) { innerPadding ->
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate(Screen.AddEditItem.route + "/ ") }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            }
+        },
+//        bottomBar = {
+//        NavigationBar {
+//            NavigationBarItem(
+//                selected = false,
+//                onClick = { navController.navigate(Screen.Categories.route) },
+//                icon = {
+//                    Icon(imageVector = Icons.Default.Category, contentDescription = null)
+//                },
+//                label = {
+//                    Text(text = "Categories")
+//                })
+//            NavigationBarItem(
+//                selected = false,
+//                onClick = { navController.navigate(Screen.Profile.route) },
+//                icon = { Icon(imageVector = Icons.Default.Person, contentDescription = null) },
+//                label = {
+//                    Text(text = "Profile")
+//                }
+//            )
+//        } }
+    ) { innerPadding ->
         Column(
             Modifier.padding(innerPadding)
         ) {
@@ -123,7 +140,10 @@ fun HomeScreen(navController: NavHostController) {
                 } else if (groceryLists.isEmpty()) {
                     Text(text = "No grocery lists found.")
                 } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         items(groceryLists) { groceryList ->
                             GroceryListItem(groceryList, navController)
                         }
@@ -140,7 +160,6 @@ fun GroceryListItem(groceryList: GroceryList, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
             .clickable {
                 navController.navigate(Screen.GroceryList.route + "/" + groceryList.id)
             },
