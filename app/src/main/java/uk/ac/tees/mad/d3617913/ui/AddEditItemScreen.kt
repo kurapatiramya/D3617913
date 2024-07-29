@@ -51,6 +51,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.room.Room
 import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -60,9 +61,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.tasks.await
+import uk.ac.tees.mad.d3617913.AppDatabase
 import java.io.File
 import java.util.UUID
-
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
@@ -104,6 +105,10 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
         }
     )
 
+    val roomDb = remember {
+        Room.databaseBuilder(context, AppDatabase::class.java, "app-database").build()
+    }
+    val categoryDao = roomDb.categoryDao()
 
     LaunchedEffect(itemId) {
         if (itemId != null) {
@@ -114,19 +119,18 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
             notes = TextFieldValue(item.getString("notes") ?: "")
             imageUri = item.getString("imageUri")?.let { Uri.parse(it) }
         }
-        Log.d("URIL IMSGE", imageUri.toString())
-        categories =
-            db.collection("categories").get().await().documents.map { it.getString("name") ?: "" }
-
+        categories = categoryDao.getAllCategories().map { it.name }
     }
+
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(
-                    text = "Add/Edit Item",
-                    fontSize = 24.sp
-                )
-            },
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Add/Edit Item",
+                        fontSize = 24.sp
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -140,8 +144,6 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             Column(modifier = Modifier.padding(16.dp)) {
-
-
                 TextField(
                     value = name,
                     onValueChange = { name = it },
@@ -229,6 +231,7 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     )
                 )
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -238,7 +241,6 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                         onClick = { imagePickerLauncher.launch("image/*") }) {
                         Text(text = "Pick Image")
                     }
-
 
                     OutlinedButton(
                         modifier = Modifier.weight(1f),
@@ -264,7 +266,6 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                         contentScale = ContentScale.Crop
                     )
                 }
-
 
                 Button(
                     onClick = {
@@ -292,21 +293,17 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                                                 context,
                                                 "Saved",
                                                 Toast.LENGTH_SHORT
-                                            )
-                                                .show()
+                                            ).show()
                                             isLoading = false
                                         },
                                         onFailure = {
-                                            Toast.makeText(context, it, Toast.LENGTH_SHORT)
-                                                .show()
+                                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                                             isLoading = false
-
                                         }
                                     )
                                 }
                             }.addOnFailureListener {
-                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT)
-                                    .show()
+                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
                                 it.printStackTrace()
                                 isLoading = false
                             }
@@ -316,8 +313,7 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                                 db, itemId, itemData,
                                 onSuccess = {
                                     navController.popBackStack()
-                                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT)
-                                        .show()
+                                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
                                     isLoading = false
                                 },
                                 onFailure = {
@@ -342,8 +338,6 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
             }
         }
     }
-
-
 }
 
 fun saveItemToFirestore(

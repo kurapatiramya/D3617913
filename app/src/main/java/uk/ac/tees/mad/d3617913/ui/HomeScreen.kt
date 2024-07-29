@@ -48,6 +48,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 import uk.ac.tees.mad.d3617913.Screen
@@ -56,22 +57,31 @@ import uk.ac.tees.mad.d3617913.Screen
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val db = Firebase.firestore
+    val auth = Firebase.auth
+    val currentUser = auth.currentUser
     var groceryLists by remember { mutableStateOf(listOf<GroceryList>()) }
     var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(Unit) {
-        isLoading = true
-        groceryLists = db.collection("items").get().await().documents.map { document ->
-            GroceryList(
-                id = document.id,
-                name = document.getString("name") ?: "",
-                category = document.getString("category") ?: "",
-                imageLink = document.getString("imageUri") ?: "",
-                notes = document.getString("notes") ?: "",
-                quantity = document.getString("quantity") ?: ""
-            )
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) {
+            isLoading = true
+            groceryLists = db.collection("items")
+                .whereEqualTo("userId", currentUser.uid)
+                .get()
+                .await()
+                .documents
+                .map { document ->
+                    GroceryList(
+                        id = document.id,
+                        name = document.getString("name") ?: "",
+                        category = document.getString("category") ?: "",
+                        imageLink = document.getString("imageUri") ?: "",
+                        notes = document.getString("notes") ?: "",
+                        quantity = document.getString("quantity") ?: ""
+                    )
+                }
+            isLoading = false
         }
-        isLoading = false
     }
 
     Scaffold(
@@ -93,7 +103,6 @@ fun HomeScreen(navController: NavHostController) {
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
-
                 }
             )
         },
@@ -101,32 +110,11 @@ fun HomeScreen(navController: NavHostController) {
             FloatingActionButton(onClick = { navController.navigate(Screen.AddEditItem.route + "/ ") }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
-        },
-//        bottomBar = {
-//        NavigationBar {
-//            NavigationBarItem(
-//                selected = false,
-//                onClick = { navController.navigate(Screen.Categories.route) },
-//                icon = {
-//                    Icon(imageVector = Icons.Default.Category, contentDescription = null)
-//                },
-//                label = {
-//                    Text(text = "Categories")
-//                })
-//            NavigationBarItem(
-//                selected = false,
-//                onClick = { navController.navigate(Screen.Profile.route) },
-//                icon = { Icon(imageVector = Icons.Default.Person, contentDescription = null) },
-//                label = {
-//                    Text(text = "Profile")
-//                }
-//            )
-//        } }
+        }
     ) { innerPadding ->
         Column(
             Modifier.padding(innerPadding)
         ) {
-
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Your Grocery Lists",
@@ -153,7 +141,6 @@ fun HomeScreen(navController: NavHostController) {
         }
     }
 }
-
 
 @Composable
 fun GroceryListItem(groceryList: GroceryList, navController: NavController) {
