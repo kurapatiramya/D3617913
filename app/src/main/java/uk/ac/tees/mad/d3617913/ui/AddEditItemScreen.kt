@@ -57,6 +57,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
@@ -64,12 +65,15 @@ import kotlinx.coroutines.tasks.await
 import uk.ac.tees.mad.d3617913.AppDatabase
 import java.io.File
 import java.util.UUID
+
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
     val context = LocalContext.current
     val db = Firebase.firestore
     val storage = Firebase.storage
+    val auth = Firebase.auth
+    val currentUser = auth.currentUser
     val focusManager = LocalFocusManager.current
     var isLoading by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf(TextFieldValue("")) }
@@ -110,27 +114,35 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
     }
     val categoryDao = roomDb.categoryDao()
 
-    LaunchedEffect(itemId) {
-        if (itemId != null) {
-            val item = db.collection("items").document(itemId).get().await()
-            name = TextFieldValue(item.getString("name") ?: "")
-            quantity = TextFieldValue(item.getString("quantity") ?: "")
-            category = TextFieldValue(item.getString("category") ?: "")
-            notes = TextFieldValue(item.getString("notes") ?: "")
-            imageUri = item.getString("imageUri")?.let { Uri.parse(it) }
+    LaunchedEffect(Unit) {
+        try {
+            categories = categoryDao.getAllCategories().map { it.name }
+
+            if (!itemId.isNullOrEmpty()) {
+                val item = db.collection("items").document(itemId).get().await()
+
+                name = TextFieldValue(item.getString("name") ?: "")
+                quantity = TextFieldValue(item.getString("quantity") ?: "")
+                category = TextFieldValue(item.getString("category") ?: "")
+                notes = TextFieldValue(item.getString("notes") ?: "")
+                imageUri = item.getString("imageUri")?.let { Uri.parse(it) }
+
+            }
+        } catch (ex: Exception) {
+            isLoading = false
+            Toast.makeText(context, ex.toString(), Toast.LENGTH_LONG).show()
         }
-        categories = categoryDao.getAllCategories().map { it.name }
+        println(categories)
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Add/Edit Item",
-                        fontSize = 24.sp
-                    )
-                },
+            TopAppBar(title = {
+                Text(
+                    text = "Add/Edit Item",
+                    fontSize = 24.sp
+                )
+            },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -205,11 +217,12 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
+                        println("CAETE $categories")
                         categories.forEach { categoryItem ->
                             DropdownMenuItem(
                                 text = { Text(text = categoryItem) },
                                 onClick = {
-                                    category = categoryItem.let { TextFieldValue(it) }
+                                    category = TextFieldValue(categoryItem)
                                     expanded = false
                                 }
                             )
@@ -231,7 +244,6 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     )
                 )
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -274,7 +286,8 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                             "name" to name.text,
                             "quantity" to quantity.text,
                             "category" to category.text,
-                            "notes" to notes.text
+                            "notes" to notes.text,
+                            "userId" to (currentUser?.uid ?: "")
                         )
 
                         if (imageUri != null && imageUri.toString().startsWith("content://")) {
@@ -297,13 +310,15 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                                             isLoading = false
                                         },
                                         onFailure = {
-                                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, it, Toast.LENGTH_SHORT)
+                                                .show()
                                             isLoading = false
                                         }
                                     )
                                 }
                             }.addOnFailureListener {
-                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT)
+                                    .show()
                                 it.printStackTrace()
                                 isLoading = false
                             }
@@ -313,7 +328,8 @@ fun AddEditItemScreen(navController: NavController, itemId: String? = null) {
                                 db, itemId, itemData,
                                 onSuccess = {
                                     navController.popBackStack()
-                                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT)
+                                        .show()
                                     isLoading = false
                                 },
                                 onFailure = {
@@ -363,4 +379,3 @@ fun saveItemToFirestore(
         }
     }
 }
-

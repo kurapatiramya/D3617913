@@ -11,13 +11,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.d3617913.ui.AddEditItemScreen
 import uk.ac.tees.mad.d3617913.ui.CategoriesScreen
 import uk.ac.tees.mad.d3617913.ui.GroceryListScreen
 import uk.ac.tees.mad.d3617913.ui.HomeScreen
+import uk.ac.tees.mad.d3617913.ui.LoginScreen
 import uk.ac.tees.mad.d3617913.ui.ProfileScreen
+import uk.ac.tees.mad.d3617913.ui.RegisterScreen
 import uk.ac.tees.mad.d3617913.ui.SplashScreen
 import uk.ac.tees.mad.d3617913.ui.theme.GroceryGoTheme
 
@@ -38,14 +42,25 @@ class MainActivity : ComponentActivity() {
 fun GroceryGoApp() {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
+    val auth = Firebase.auth
+    val currentUser = auth.currentUser
+
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
             SplashScreen {
                 scope.launch(Dispatchers.Main) {
                     navController.popBackStack()
-                    navController.navigate(Screen.Home.route)
+                    navController.navigate(if (currentUser != null) Screen.Home.route else Screen.Login.route)
                 }
             }
+        }
+
+        composable(Screen.Login.route) {
+            LoginScreen(navController = navController)
+        }
+
+        composable(Screen.Register.route) {
+            RegisterScreen(navController = navController)
         }
 
         composable(Screen.Home.route) {
