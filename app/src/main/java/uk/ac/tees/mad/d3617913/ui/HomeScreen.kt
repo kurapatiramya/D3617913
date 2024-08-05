@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -46,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -82,7 +84,8 @@ fun HomeScreen(navController: NavHostController) {
                             category = document.getString("category") ?: "",
                             imageLink = document.getString("imageUri") ?: "",
                             notes = document.getString("notes") ?: "",
-                            quantity = document.getString("quantity") ?: ""
+                            quantity = document.getString("quantity") ?: "",
+                            bought = document.getBoolean("bought") ?: false
                         )
                     }
                 isLoading = false
@@ -161,14 +164,21 @@ fun GroceryListItem(groceryList: GroceryList, navController: NavController) {
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Image(
-            painter = rememberAsyncImagePainter(groceryList.imageLink),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            contentScale = ContentScale.Crop
-        )
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Checkbox(
+                checked = groceryList.bought, onCheckedChange = {}, modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .zIndex(2f)
+            )
+            Image(
+                painter = rememberAsyncImagePainter(groceryList.imageLink),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentScale = ContentScale.Crop
+            )
+        }
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -193,4 +203,5 @@ data class GroceryList(
     val imageLink: String,
     val notes: String,
     val quantity: String,
+    val bought: Boolean
 )
