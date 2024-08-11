@@ -94,9 +94,9 @@ fun GroceryGoApp() {
         composable(Screen.Categories.route) {
             CategoriesScreen(navController)
         }
-//        composable(Screen.Profile.route) {
-//            ProfileScreen(navController)
-//        }
+        composable(Screen.Profile.route) {
+            ProfileScreen(navController)
+        }
 
     }
 }
